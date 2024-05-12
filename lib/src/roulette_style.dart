@@ -32,6 +32,7 @@ class RouletteStyle {
   const RouletteStyle({
     this.dividerThickness = 5,
     this.dividerColor = Colors.white,
+    this.selectedDividerColor = Colors.white,
     this.centerStickerColor = Colors.blue,
     this.centerStickSizePercent = 0.1,
     this.textLayoutBias = 0.85,
@@ -43,6 +44,9 @@ class RouletteStyle {
 
   /// The color of divider between each parts
   final Color dividerColor;
+
+  /// The color of selected tile's divider
+  final Color selectedDividerColor;
 
   /// The color of the circle at center
   final Color centerStickerColor;
