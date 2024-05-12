@@ -40,12 +40,15 @@ class RouletteController with ChangeNotifier {
   RouletteGroup _group;
   Animation<double> _animation;
   final AnimationController _controller;
+  int _targetIndex = 0;
 
   /// Current rotate animation
   Animation<double> get animation => _animation;
 
   /// Retrieve current displaying [RouletteGroup]
   RouletteGroup get group => _group;
+
+  int get targetIndex => _targetIndex;
 
   /// Set the [RouletteGroup] to refresh widget
   set group(RouletteGroup value) {
@@ -81,16 +84,21 @@ class RouletteController with ChangeNotifier {
     Curve? curve = Curves.fastOutSlowIn,
     double offset = 0,
   }) async {
+    _targetIndex = targetIndex;
     final targetRotate = calculateEndRotate(
       group,
       targetIndex,
       clockwise,
       minRotateCircles,
-      offset: offset,
+      offset: clockwise ? offset + 1 : offset,
     );
     _controller.duration = duration;
-    _animation = makeAnimation(_controller, targetRotate, curve,
-        initialValue: animation.value);
+    _animation = makeAnimation(
+      _controller,
+      targetRotate,
+      curve,
+      initialValue: animation.value,
+    );
     notifyListeners();
     await _controller.forward(from: 0);
   }
