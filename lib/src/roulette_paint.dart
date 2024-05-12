@@ -28,11 +28,15 @@ class RoulettePaint extends AnimatedWidget {
     required Animation<double> animation,
     required this.style,
     required this.group,
+    required this.selected,
     required this.imageInfos,
+    required this.shouldIncludeTextOrIcon,
   }) : super(key: key, listenable: animation);
 
   final RouletteStyle style;
   final RouletteGroup group;
+  final int selected;
+  final bool shouldIncludeTextOrIcon;
   final Map<int, ImageInfo> imageInfos;
 
   Animation<double> get _rotation => listenable as Animation<double>;
@@ -47,6 +51,8 @@ class RoulettePaint extends AnimatedWidget {
           style: style,
           group: group,
           imageInfos: imageInfos,
+          selectedIndex: selected,
+          shouldIncludeTextOrIcon: shouldIncludeTextOrIcon,
         ),
       ),
     );
@@ -59,12 +65,16 @@ class _RoulettePainter extends CustomPainter {
     required this.rotate,
     required this.group,
     required this.imageInfos,
+    required this.selectedIndex,
+    required this.shouldIncludeTextOrIcon,
   });
 
-  final double rotate;
-  final RouletteStyle style;
   final RouletteGroup group;
   final Map<int, ImageInfo> imageInfos;
+  final double rotate;
+  final int selectedIndex;
+  final bool shouldIncludeTextOrIcon;
+  final RouletteStyle style;
 
   final Paint _paint = Paint();
 
@@ -80,16 +90,46 @@ class _RoulettePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final radius = size.width / 2;
     final rect = Rect.fromCircle(center: Offset.zero, radius: radius);
+    final double finetuneValue;
+
+    if (group.totalWeights == 2) {
+      finetuneValue = 1.55;
+    } else if (group.totalWeights == 3) {
+      finetuneValue = 1.0;
+    } else if (group.totalWeights == 4) {
+      finetuneValue = 0.8;
+    } else if (group.totalWeights == 5) {
+      finetuneValue = 0.65;
+    } else if (group.totalWeights == 6) {
+      finetuneValue = 0.54;
+    } else if (group.totalWeights == 7) {
+      finetuneValue = 0.46;
+    } else if (group.totalWeights == 8) {
+      finetuneValue = 0.39;
+    } else if (group.totalWeights == 9) {
+      finetuneValue = 0.35;
+    } else if (group.totalWeights == 10) {
+      finetuneValue = 0.34;
+    } else if (group.totalWeights == 11) {
+      finetuneValue = 0.28;
+    } else if (group.totalWeights == 12) {
+      finetuneValue = 0.25;
+    } else {
+      finetuneValue = 0;
+    }
 
     canvas.translate(size.width / 2, size.height / 2);
 
     canvas.save();
-    canvas.rotate(-pi / 2 + rotate);
+    canvas.rotate(pi / 2 + rotate - finetuneValue);
 
     // Draws the backgrounds of the sections.
     _drawBackground(canvas, radius, rect);
-    // Draws the content of the sections.
-    _drawSections(canvas, radius);
+
+    // Draws the content of the sections. not necessary for current requirement
+    if (shouldIncludeTextOrIcon) {
+      _drawSections(canvas, radius);
+    }
 
     canvas.restore();
 
@@ -121,12 +161,14 @@ class _RoulettePainter extends CustomPainter {
       final resolvedImage = imageInfos[i]?.image;
       if (unit.image != null && resolvedImage != null) {
         // Draws the section background image
-        _drawBackgroundImage(canvas, radius, rect, unit, sweep, resolvedImage);
+        _drawBackgroundImage(
+            canvas, radius, rect, unit, sweep, resolvedImage, i);
       }
 
       // Draws the section border
-      _paint.color = style.dividerColor;
-      _paint.strokeWidth = style.dividerThickness;
+      _paint.color =
+          i == selectedIndex ? style.selectedDividerColor : style.dividerColor;
+      _paint.strokeWidth = style.dividerThickness + 2.4;
       _paint.style = ui.PaintingStyle.stroke;
       canvas.drawArc(rect, 0.0 * i, sweep, true, _paint);
 
@@ -137,7 +179,7 @@ class _RoulettePainter extends CustomPainter {
 
   /// Draws the image to the background of the current section.
   void _drawBackgroundImage(Canvas canvas, double radius, Rect rect,
-      RouletteUnit unit, double sweep, ui.Image image) {
+      RouletteUnit unit, double sweep, ui.Image image, int index) {
     // Draws the section background image
 
     // Path for this section.
@@ -163,7 +205,9 @@ class _RoulettePainter extends CustomPainter {
     Matrix4 matrix = composeMatrixFromOffsets(
       translate: Offset(style.dividerThickness / 2 - 1,
           rect2.top + rect2.height * 4 + style.dividerThickness / 2 + 1),
-      scale: (max(scaleX, scaleY)) - 0.002,
+      scale: index == selectedIndex
+          ? (max(scaleX, scaleY)) + 0.004
+          : (max(scaleX, scaleY)) - 0.002,
       rotation: sweep / 2 + pi / 2,
       anchor: Offset.zero,
     );
