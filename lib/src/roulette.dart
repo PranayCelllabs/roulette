@@ -17,6 +17,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:roulette/utils/constants.dart';
 
 import 'roulette_style.dart';
 import 'roulette_controller.dart';
@@ -29,6 +30,7 @@ class Roulette extends StatefulWidget {
     Key? key,
     required this.controller,
     this.style = const RouletteStyle(),
+    this.includeTextOrImages = defaultIncludeTextOrImages,
   }) : super(key: key);
 
   /// Controls the roulette.
@@ -36,6 +38,7 @@ class Roulette extends StatefulWidget {
 
   /// The display style of the roulette.
   final RouletteStyle style;
+  final bool includeTextOrImages;
 
   @override
   State<Roulette> createState() => _RouletteState();
@@ -119,11 +122,13 @@ class _RouletteState extends State<Roulette> {
       animation: Listenable.merge([widget.controller, _imageInfoNotifier]),
       builder: (context, child) {
         return RoulettePaint(
+          selected: widget.controller.targetIndex,
           key: widget.key,
           animation: widget.controller.animation,
           style: widget.style,
           group: widget.controller.group,
           imageInfos: _imageInfoNotifier.value,
+          shouldIncludeTextOrIcon: widget.includeTextOrImages,
         );
       },
     );
