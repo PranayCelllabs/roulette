@@ -27,9 +27,11 @@ class MyApp extends StatelessWidget {
 class MyRoulette extends StatelessWidget {
   const MyRoulette({
     Key? key,
+    // required this.selectedIndex,
     required this.controller,
   }) : super(key: key);
 
+  // final int selectedIndex;
   final RouletteController controller;
 
   @override
@@ -47,15 +49,16 @@ class MyRoulette extends StatelessWidget {
               controller: controller,
               // Configure roulette's appearance
               style: const RouletteStyle(
-                dividerThickness: 0.0,
-                dividerColor: Colors.black,
-                centerStickSizePercent: 0.05,
-                centerStickerColor: Colors.black,
+                dividerThickness: 2,
+                dividerColor: Color(0xFFDCEDFC),
+                selectedDividerColor: Color(0xFF80B947),
+                centerStickSizePercent: 0.08,
+                centerStickerColor: Color(0xFFA5D6FF),
               ),
             ),
           ),
         ),
-        const Arrow(),
+        // const Arrow(),
       ],
     );
   }
@@ -73,7 +76,7 @@ class _HomePageState extends State<HomePage>
   static final _random = Random();
 
   late RouletteController _controller;
-  bool _clockwise = true;
+  int selectedIndex = 0;
 
   final colors = <Color>[
     Colors.red.withAlpha(50),
@@ -82,6 +85,8 @@ class _HomePageState extends State<HomePage>
     Colors.yellow.withAlpha(90),
     Colors.amber.withAlpha(50),
     Colors.indigo.withAlpha(70),
+    Colors.indigo.withAlpha(70),
+    // Colors.indigo.withAlpha(70),
   ];
 
   final icons = <IconData>[
@@ -91,17 +96,22 @@ class _HomePageState extends State<HomePage>
     Icons.accessibility,
     Icons.account_balance,
     Icons.account_balance_wallet,
+    Icons.account_balance_wallet,
+    // Icons.account_balance_wallet,
   ];
 
   final images = <ImageProvider>[
     // Use [AssetImage] if you have 2.0x, 3.0x images,
     // We only have 1 exact image here
-    const ExactAssetImage("asset/gradient.jpg"),
     const NetworkImage("https://picsum.photos/seed/example1/400"),
-    const ExactAssetImage("asset/gradient.jpg"),
-    const NetworkImage("https://bad.link.to.image"),
-    const ExactAssetImage("asset/gradient.jpg"),
+    const NetworkImage("https://picsum.photos/seed/example2/400"),
+    const NetworkImage("https://picsum.photos/seed/example3/400"),
+    const NetworkImage("https://picsum.photos/seed/example4/400"),
+    // const NetworkImage("https://bad.link.to.image"),
     const NetworkImage("https://picsum.photos/seed/example5/400"),
+    const NetworkImage("https://picsum.photos/seed/example6/400"),
+    // const NetworkImage("https://picsum.photos/seed/example7/400"),
+    // const NetworkImage("https://picsum.photos/seed/example8/400"),
     // MemoryImage(...)
     // FileImage(...)
     // ResizeImage(...)
@@ -111,19 +121,16 @@ class _HomePageState extends State<HomePage>
   void initState() {
     super.initState();
 
-    assert(colors.length == icons.length);
-    assert(colors.length == images.length);
+    // assert(colors.length == icons.length);
+    // assert(colors.length == images.length);
 
     _controller = RouletteController(
       vsync: this,
       group: RouletteGroup.uniformImages(
-        colors.length,
-        colorBuilder: (index) => colors[index],
+        images.length,
+        // colorBuilder: (index) => colors[index],
         imageBuilder: (index) => images[index],
-        textBuilder: (index) {
-          if (index == 0) return 'Hi';
-          return '';
-        },
+        // textBuilder: (index) => '$index',
         styleBuilder: (index) {
           return const TextStyle(color: Colors.black);
         },
@@ -144,24 +151,6 @@ class _HomePageState extends State<HomePage>
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    "Clockwise: ",
-                    style: TextStyle(fontSize: 18),
-                  ),
-                  Switch(
-                    value: _clockwise,
-                    onChanged: (onChanged) {
-                      setState(() {
-                        _controller.resetAnimation();
-                        _clockwise = !_clockwise;
-                      });
-                    },
-                  ),
-                ],
-              ),
               MyRoulette(controller: _controller),
             ],
           ),
@@ -172,11 +161,7 @@ class _HomePageState extends State<HomePage>
       ),
       floatingActionButton: FloatingActionButton(
         // Use the controller to run the animation with rollTo method
-        onPressed: () => _controller.rollTo(
-          3,
-          clockwise: _clockwise,
-          offset: _random.nextDouble(),
-        ),
+        onPressed: rollTo,
         child: const Icon(Icons.refresh_rounded),
       ),
     );
@@ -186,5 +171,19 @@ class _HomePageState extends State<HomePage>
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  rollTo() {
+    setState(() {
+      selectedIndex = _random.nextInt(5);
+    });
+    debugPrint('selectedIndex: $selectedIndex');
+    _controller.rollTo(
+      selectedIndex,
+      duration: const Duration(milliseconds: 600),
+      minRotateCircles: 0,
+      clockwise: _random.nextBool(),
+      offset: images.length + 0.0,
+    );
   }
 }
