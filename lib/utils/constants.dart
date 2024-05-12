@@ -13,7 +13,7 @@
 /// limitations under the License.
 
 /// Rotate values which used to simulate begining
-const int defaultMinRotateCircles = 12;
+const int defaultMinRotateCircles = 0;
 
 /// Default rotate animation run time
 const Duration defaultDuration = Duration(seconds: 5);

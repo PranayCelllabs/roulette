@@ -67,7 +67,7 @@ double calculateEndRotate(
   final targetRotate = 2 * pi * totalRotateWeight / group.totalWeights;
   final targetCoverRotate =
       2 * pi * units[targetIndex].weight / group.totalWeights;
-  var offsetValue = offset * targetCoverRotate; // Random rotate out
+  var offsetValue = offset; // Random rotate out
   final totalRotate = preRotation + targetRotate + offsetValue;
   return clockwise ? totalRotate : -totalRotate;
 }
